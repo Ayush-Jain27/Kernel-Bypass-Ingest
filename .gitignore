@@ -1,0 +1,63 @@
+# ---- Vivado / Vitis ----
+# The Vivado project is regenerated from hw/scripts/, never committed.
+hw/vivado/
+*.xpr
+*.cache/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+*.gen/
+.Xil/
+*.jou
+*.log
+*.str
+*.wdb
+*.wcfg
+vivado_pid*.str
+webtalk*.jou
+webtalk*.log
+xsim.dir/
+hw/sim/
+.cxl.*
+dfx_runtime.txt
+hd_visual/
+tight_setup_hold_pins.txt
+
+# Build outputs. Regenerable, and large.
+*.bit
+*.bin
+*.ltx
+*.xsa
+*.pdi
+
+# ---- PetaLinux ----
+build/
+images/
+components/
+.petalinux/
+*.bsp
+config.old
+rootfsconfig.old
+pre-built/
+
+# ---- Yocto / OE ----
+sstate-cache/
+downloads/
+tmp-glibc/
+
+# ---- third party board files ----
+# Fetched by hw/scripts/fetch_board_files.{sh,ps1}. Not vendored: upstream
+# (RealDigitalOrg/aup-zu3-bsp) ships no LICENSE, so it is not ours to
+# redistribute from a public repo.
+hw/board_files/
+
+# ---- misc ----
+__pycache__/
+*.pyc
+.venv/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

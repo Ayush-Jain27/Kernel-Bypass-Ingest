@@ -1,0 +1,31 @@
+# Authored on Windows, consumed on Linux (WSL, PetaLinux, the board itself).
+# Force LF so shell scripts keep a working #! line and Tcl/device tree sources
+# do not pick up stray carriage returns.
+* text=auto eol=lf
+
+*.sh      text eol=lf
+*.tcl     text eol=lf
+*.dts     text eol=lf
+*.dtsi    text eol=lf
+*.sv      text eol=lf
+*.svh     text eol=lf
+*.v       text eol=lf
+*.vh      text eol=lf
+*.xdc     text eol=lf
+*.c       text eol=lf
+*.h       text eol=lf
+*.py      text eol=lf
+Makefile  text eol=lf
+
+# Batch files are the exception: cmd.exe wants CRLF.
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+
+# Binary, never touched.
+*.bit     binary
+*.bin     binary
+*.xsa     binary
+*.bsp     binary
+*.png     binary
+*.jpg     binary
+*.pdf     binary
