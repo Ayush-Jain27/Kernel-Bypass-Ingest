@@ -1,0 +1,81 @@
+# Buildroot configuration for the AUP-ZU3 (Zynq UltraScale+ XCZU3EG, 8 GB DDR4).
+#
+# Derived from Buildroot's zynqmp_zcu106_defconfig. Differences are the board
+# specific parts: psu_init_gpl from our XSA, our device tree, and the U-Boot
+# DEVICE_TREE name.
+#
+# Buildroot builds the entire boot chain, so no Vitis and no bootgen:
+#   U-Boot SPL   stands in for the FSBL
+#   embeddedsw   supplies the PMU firmware, built with a MicroBlaze bare-metal
+#                toolchain Buildroot also builds
+#   ATF          BL31
+#   U-Boot       proper
+#   linux-xlnx   kernel, matching the 2025.2 tools
+#   genimage     assembles a bootable sdcard.img
+
+BR2_aarch64=y
+BR2_TOOLCHAIN_EXTERNAL=y
+BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
+BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_AARCH64_GLIBC_STABLE=y
+BR2_TOOLCHAIN_BARE_METAL_BUILDROOT=y
+BR2_TOOLCHAIN_BARE_METAL_BUILDROOT_ARCH="microblazeel-buildroot-elf"
+BR2_GLOBAL_PATCH_DIR="board/xilinx/patches"
+BR2_DOWNLOAD_FORCE_CHECK_HASHES=y
+BR2_ROOTFS_POST_BUILD_SCRIPT="board/aup-zu3/post-build.sh"
+BR2_ROOTFS_POST_IMAGE_SCRIPT="board/aup-zu3/post-image.sh"
+BR2_ROOTFS_POST_SCRIPT_ARGS="ttyPS0,115200 mmcblk0p2"
+
+# Kernel. linux-xlnx rather than mainline, matching the 2025.2 tool release,
+# because the Xilinx tree carries the AXI DMA and related drivers the
+# interrupt-driven baseline at M6 will want to compare against.
+BR2_LINUX_KERNEL=y
+BR2_LINUX_KERNEL_CUSTOM_TARBALL=y
+BR2_LINUX_KERNEL_CUSTOM_TARBALL_LOCATION="$(call github,Xilinx,linux-xlnx,xlnx_rebase_v6.12_LTS_merge_6.12.60)/xlnx_rebase_v6.12_LTS_merge_6.12.60.tar.gz"
+BR2_LINUX_KERNEL_DEFCONFIG="xilinx"
+BR2_LINUX_KERNEL_DTS_SUPPORT=y
+BR2_LINUX_KERNEL_CUSTOM_DTS_PATH="board/aup-zu3/dts/system-top.dts board/aup-zu3/dts/pcw.dtsi board/aup-zu3/dts/zynqmp.dtsi board/aup-zu3/dts/zynqmp-clk-ccf.dtsi board/aup-zu3/dts/zynqmp-u-boot.dtsi"
+BR2_LINUX_KERNEL_INTREE_DTS_NAME="system-top"
+BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
+
+BR2_PACKAGE_XILINX_FPGAUTIL=y
+
+BR2_TARGET_ROOTFS_EXT2=y
+BR2_TARGET_ROOTFS_EXT2_4=y
+# BR2_TARGET_ROOTFS_TAR is not set
+
+BR2_TARGET_ARM_TRUSTED_FIRMWARE=y
+BR2_TARGET_ARM_TRUSTED_FIRMWARE_CUSTOM_TARBALL=y
+BR2_TARGET_ARM_TRUSTED_FIRMWARE_CUSTOM_TARBALL_LOCATION="$(call github,Xilinx,arm-trusted-firmware,xlnx_rebase_v2.12_2025.2)/xlnx_rebase_v2.12_2025.2.tar.gz"
+BR2_TARGET_ARM_TRUSTED_FIRMWARE_PLATFORM="zynqmp"
+BR2_TARGET_ARM_TRUSTED_FIRMWARE_BL31_UBOOT=y
+
+BR2_TARGET_UBOOT=y
+BR2_TARGET_UBOOT_BUILD_SYSTEM_KCONFIG=y
+BR2_TARGET_UBOOT_CUSTOM_TARBALL=y
+BR2_TARGET_UBOOT_CUSTOM_TARBALL_LOCATION="$(call github,Xilinx,u-boot-xlnx,xlnx_rebase_v2025.01_2025.2)/xlnx_rebase_v2025.01_2025.2.tar.gz"
+BR2_TARGET_UBOOT_BOARD_DEFCONFIG="xilinx_zynqmp_virt"
+BR2_TARGET_UBOOT_NEEDS_DTC=y
+BR2_TARGET_UBOOT_NEEDS_OPENSSL=y
+BR2_TARGET_UBOOT_NEEDS_GNUTLS=y
+BR2_TARGET_UBOOT_NEEDS_UTIL_LINUX=y
+BR2_TARGET_UBOOT_NEEDS_ATF_BL31=y
+BR2_TARGET_UBOOT_USE_BINMAN=y
+BR2_TARGET_UBOOT_FORMAT_ITB=y
+BR2_TARGET_UBOOT_SPL=y
+BR2_TARGET_UBOOT_SPL_NAME="spl/boot.bin"
+BR2_TARGET_UBOOT_ZYNQMP=y
+BR2_TARGET_UBOOT_ZYNQMP_PMUFW_EMBEDDEDSW=y
+
+# The one file that absolutely must be ours. Buildroot's readme is blunt: with
+# the wrong psu_init_gpl, boot.bin builds fine and then does nothing at all. It
+# configures the DDR4 controller, PS clocks and MIO pinout, and it is extracted
+# straight out of the XSA the board preset produced.
+BR2_TARGET_UBOOT_ZYNQMP_PSU_INIT_FILE="board/aup-zu3/psu_init_gpl.c"
+BR2_TARGET_UBOOT_CUSTOM_MAKEOPTS="DEVICE_TREE=system-top"
+
+BR2_TARGET_XILINX_EMBEDDEDSW=y
+BR2_TARGET_XILINX_EMBEDDEDSW_ZYNQMP_PMUFW=y
+
+BR2_PACKAGE_HOST_DOSFSTOOLS=y
+BR2_PACKAGE_HOST_GENIMAGE=y
+BR2_PACKAGE_HOST_MTOOLS=y
